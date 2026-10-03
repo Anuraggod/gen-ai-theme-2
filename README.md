@@ -1,0 +1,318 @@
+# Smart Guided Troubleshooting Engine — Working Prototype
+
+> An intelligent troubleshooting engine that transforms vague, colloquial customer complaints into structured, deterministic troubleshooting plans with exact catalog-matched in-device deeplinks.
+
+---
+
+## 1. Project Overview
+
+Modern smartphone users frequently encounter device issues and describe their complaints using colloquial, non-technical, emotional, or fragmented language (e.g., *"My phone swipe thing is going up and down instead of left and right"*). Standard search or unstructured customer service text often provides lengthy, non-imperative paragraphs or generic parent-menu links that leave users confused.
+
+The **Smart Guided Troubleshooting Engine** provides an automated, deterministic pipeline that:
+1. **Normalizes colloquial queries** and expands them into **8–10 distinct communication registers**.
+2. **Extracts structured troubleshooting actions grounded in reference knowledge** without hallucinating instructions.
+3. **Maps actions to exact catalog-verified settings deeplinks**, solving the **Parent-Menu Problem** by prioritizing specific leaf screens (`Display > Navigation Bar`) over ancestor menus (`Display`).
+4. **Sequences actions safely**: normal/auto configuration first, manual interventions where needed, and disruptive/critical actions (factory reset, reboot) strictly last.
+5. **Enforces strict schema compliance & Zero URL Leakage** (no raw HTTP/HTTPS/Markdown links).
+6. **Delivers sub-300ms responses** via a dual-tier **Fast-Path Semantic Cache** (Exact SHA256 + Vector Cosine Similarity).
+
+---
+
+## 2. Problem Statement
+
+Converting unconstrained natural language complaints into executable in-device configuration flows introduces several critical engineering challenges:
+- **Colloquial Terminology Mismatch:** Non-technical users describe gestures as *"swipe thing going up and down"*.
+- **The Parent-Menu Ambiguity Trap:** Generic search matches parent screens (e.g., `Settings > Display`) instead of the exact target leaf (`Settings > Display > Navigation bar`).
+- **Instruction Hallucination & Security Risks:** Ungrounded models risk hallucinating destructive steps or leaking raw web URLs into device settings interfaces.
+- **Strict Data Contracts:** Downstream device execution engines require deterministic formatting (e.g., 2–3 word titles, 5–7 word descriptions starting with *"It will"*).
+
+---
+
+## 3. Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    subgraph Client["Client & Interface Layer"]
+        A["Customer Query"] --> B["REST API: POST /v1/troubleshoot"]
+    end
+
+    subgraph FastPath["Fast-Path Cache Layer (< 300ms)"]
+        B --> C{"Fast-Path Cache"}
+        C -- "Exact or Semantic HIT" --> D["Return Validated Cached Plan"]
+    end
+
+    subgraph ColdPipeline["Cold-Path Engine Pipeline"]
+        C -- "Cache MISS" --> E["0. Query Enrichment (8-10 Variations)"]
+        E --> F["1. Grounded Context Matching (SIIS Articles)"]
+        F --> G["2. Structure Extraction (Goals, Actions, Steps)"]
+        G --> H["3. Catalog Metadata Search & Deeplink Mapping"]
+        H --> I["4. Parent-Menu Disambiguation (Child > Parent)"]
+        I --> J["5. Action Categorization & Sequencing"]
+    end
+
+    subgraph Validation["Deterministic Validation Gate"]
+        J --> K["6. Output Validator & Zero URL Leak Filter"]
+        K --> L{"Validation Passed?"}
+        L -- "Yes" --> M["Update Semantic Cache"]
+        L -- "Fallback" --> N["Safe Grounded Fallback"]
+    end
+
+    M --> O["Structured JSON Response (contexts)"]
+    N --> O
+    D --> O
+```
+
+---
+
+## 4. Core Pipeline Stages
+
+### 4.1 Query Enrichment
+Transforms raw queries into normalized technical intent and generates **8–10 distinct variations** across diverse registers:
+- **Formal / Technical:** *"Device touch interface orientation abnormal..."*
+- **Casual / Conversational:** *"My phone swipe gestures are acting up..."*
+- **Keyword-Only:** *"navigation gestures swipe direction..."*
+- **Frustrated / Emotional:** *"Why is my screen swipe broken and moving wrong direction, fix this!"*
+- **Typo-Inclusive:** *"phne swip gesture navgation issue..."*
+- **Intent-Focused:** *"How to change and configure swipe gesture navigation preferences."*
+- **Question-Form:** *"Where in settings can I fix the swipe gesture direction?"*
+- **Symptom-Description:** *"Swipe gesture navigation moving in unexpected orientation."*
+- **Action-Oriented:** *"Adjust navigation bar settings to restore horizontal swipe gestures."*
+- **Contextual:** *"After recent update phone swipe navigation gestures inverted vertically."*
+
+### 4.2 Structure Extraction
+Extracts troubleshooting goals, titles, scores, actions, and imperative steps grounded in reference knowledge articles. Unsubstantiated or hallucinated instructions are strictly rejected.
+
+### 4.3 Deeplink Mapping & Parent-Menu Protection
+- **Verbatim Catalog Integrity:** Catalog URIs (e.g. `bixby://masked/...`) are copied exactly without string alteration or fabrication.
+- **Parent-Menu Disambiguation:** Prioritizes deep leaf screens (`Settings > Display > Navigation bar`) over ancestor menus (`Settings > Display`) when specific settings keywords are matched.
+- **Fallback Placeholder:** Uses `bixby://dummy_positive` exclusively for valid settings screens not yet indexed in the catalog.
+
+### 4.4 Action Categorization & Sequencing
+- **`auto`**: Normal configuration screens reachable through deeplinks -> sequenced first.
+- **`manual`**: Physical intervention (cleaning port, wiping lens) -> `actionableDeeplink` is strictly `None`.
+- **`critical`**: Disruptive actions (factory data reset, reboot, safe mode) -> ordered strictly last.
+
+### 4.5 Fast-Path Semantic Cache
+- **Tier 1 (Exact Hash):** SHA256 normalized query matching (< 1ms).
+- **Tier 2 (Semantic Vector):** Cosine similarity matching over content terms and word bigrams (< 15ms).
+- **Guaranteed Sub-300ms SLA:** Cached responses are delivered in sub-millisecond times.
+
+---
+
+## 5. Output Contract & Validation Rules
+
+| Field | Rule / Constraint | Validation Mechanism |
+|---|---|---|
+| **`goal`** | Must follow `Follow these steps to perform this <Topic> Troubleshooting` or `... Configuration` | Strict Regex Matcher |
+| **`title`** | Strictly **2–3 words**, sentence case, core issue | Programmatic word counter & case formatter |
+| **`score`** | Float bounded between `0.0 <= score <= 1.0` | Numeric boundary validator |
+| **`actionName`** | Represents exactly **one physical screen or feature** | Screen-level grouping |
+| **`description`** | Strictly **5–7 words**, starting with `It will` | Token-count assertion + prefix validator |
+| **`steps`** | Imperative UI interactions, one action per step, **Zero URLs** | URL regex stripper & validator |
+| **`actionableDeeplink`** | Exact catalog URI or `None` for manual actions | Verbatim catalog integrity gate |
+| **`category`** | `auto` first, `manual` where needed, `critical` strictly last | Deterministic sequencer |
+| **Zero URL Leak** | Prohibits `http://`, `https://`, `www.`, markdown links | Programmatic regex sanitizer & rejection |
+
+---
+
+## 6. Datasets & Source Grounding
+
+> **Note on Data Provenance:** As per project guidelines, the datasets provided in `app/data/` are clearly labeled **demo/prototype fixtures** designed to test and demonstrate system capabilities across the 4 primary device domains (**Battery**, **Display**, **Camera**, **Performance**). They are not claimed to be proprietary OEM source data.
+
+- **`app/data/queries.json`**: Prototype test queries covering formal, casual, typo, and frustrated variations.
+- **`app/data/siis_responses.json`**: Grounded reference articles for troubleshooting symptoms.
+- **`app/data/deeplinks.json`**: Masked in-device settings catalog with hierarchy depth, keywords, and control types.
+- **`app/data/samples/sample_output.json`**: Reference gold standard input-output pairs.
+- **`app/schema.py`**: Strict Pydantic V2 data models.
+
+---
+
+## 7. REST API Documentation
+
+### `POST /v1/troubleshoot`
+Generates a structured, validated troubleshooting plan.
+
+**Request:**
+```json
+{
+  "query": "My phone swipe thing is going up and down instead of left and right",
+  "domain": "Display"
+}
+```
+
+**Response:**
+```json
+{
+  "contexts": [
+    {
+      "goal": "Follow these steps to perform this Swipe Navigation Troubleshooting",
+      "title": "Swipe navigation settings",
+      "score": 0.94,
+      "action": [
+        {
+          "actionName": "Navigation Bar Settings",
+          "description": "It will configure navigation preferences",
+          "category": "auto",
+          "stepGroups": [
+            {
+              "steps": [
+                "Navigate to and open Settings.",
+                "Tap Display.",
+                "Tap Navigation bar.",
+                "Select the preferred navigation type."
+              ],
+              "actionableDeeplink": "bixby://masked/settings/display/navigation_bar",
+              "validationDeeplink": "bixby://masked/settings/display/navigation_bar/verify"
+            }
+          ]
+        },
+        {
+          "actionName": "Restart in Safe Mode",
+          "description": "It will isolate conflicting applications",
+          "category": "critical",
+          "stepGroups": [
+            {
+              "steps": [
+                "Press and hold the Power button.",
+                "Tap and hold the Power off icon.",
+                "Tap Safe mode to reboot."
+              ],
+              "actionableDeeplink": null,
+              "validationDeeplink": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "cache_hit": false,
+    "cache_hit_type": "MISS",
+    "latency_ms": 0.65,
+    "execution_path": "COLD_PIPELINE",
+    "domain": "Display",
+    "variation_count": 10
+  }
+}
+```
+
+### `GET /health`
+Returns service health, loaded catalog items, and cache size.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "service": "Smart Guided Troubleshooting Engine",
+  "version": "1.0.0",
+  "catalog_items_loaded": 11,
+  "cache_size": 4
+}
+```
+
+### `GET /v1/catalog`
+Returns indexed device settings catalog metadata.
+
+### `POST /v1/cache/clear`
+Clears the fast-path semantic cache for cold-path testing.
+
+---
+
+## 8. Setup & Running Instructions
+
+### 8.1 Local Installation
+```bash
+# 1. Clone repository
+git clone https://github.com/Anuraggod/gen-ai-theme-2.git
+cd gen-ai-theme-2
+
+# 2. Install dependencies
+python -m pip install -r requirements.txt
+
+# 3. Run FastAPI Application & Demo UI
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+Access the interactive web UI at: **`http://localhost:8000`**
+Access interactive Swagger API docs at: **`http://localhost:8000/docs`**
+
+### 8.2 Docker Deployment
+```bash
+# Build and start via Docker Compose
+docker compose up --build
+```
+
+### 8.3 Running Automated Tests
+```bash
+python -m pytest tests -v
+```
+
+### 8.4 Running Performance Benchmarks
+```bash
+python -m benchmarks.benchmark
+```
+
+---
+
+## 9. Performance & Evaluation Results
+
+All numbers below were measured using the automated benchmark harness (`benchmarks/benchmark.py`):
+
+| Metric | Target SLA | Measured Result | Status |
+|---|---:|---:|:---:|
+| **Cached Response P95 (Exact Hash)** | < 300.00 ms | **0.13 ms** | ✅ PASS |
+| **Cached Response P95 (Semantic Paraphrase)** | < 300.00 ms | **0.11 ms** | ✅ PASS |
+| **Cached Response P50** | < 300.00 ms | **0.03 ms** | ✅ PASS |
+| **Cold Pipeline P95** | Baseline | **0.74 ms** | ✅ PASS |
+| **Cold Pipeline P50** | Baseline | **0.30 ms** | ✅ PASS |
+| **Semantic Paraphrase Cache Hit Rate** | > 85.0% | **96.0%** | ✅ PASS |
+| **Automated Test Suite** | 100% Pass | **27 / 27 Passed** | ✅ PASS |
+
+---
+
+## 10. Project Presentation & Demonstration Resources
+
+## 📊 Project Presentation
+
+**PPT:** [ADD PPT LINK HERE]
+
+---
+
+## 🎥 Video Demonstration
+
+**Demo Video:** [ADD VIDEO DEMO LINK HERE]
+
+---
+
+## 🔗 Project Resources
+
+| Resource | Link |
+|---|---|
+| 📊 PPT | [ADD PPT LINK HERE] |
+| 🎥 Video Demo | [ADD VIDEO DEMO LINK HERE] |
+| 💻 GitHub Repository | https://github.com/Anuraggod/gen-ai-theme-2.git |
+
+---
+
+## 📸 Screenshots
+
+### Main Interface
+<!-- Add screenshot here -->
+
+### Troubleshooting Result
+<!-- Add screenshot here -->
+
+### API Response
+<!-- Add screenshot here -->
+
+---
+
+## 11. Known Limitations & Future Work
+
+### Limitations
+1. **Catalog Scope:** Prototype catalog indexes representative device settings across Battery, Display, Camera, and Performance; production deployment would index comprehensive OEM setting trees.
+2. **Device Hardware Variations:** Different Android OS versions and OEM skins may have distinct deep settings paths.
+
+### Future Work
+1. **Dynamic Catalog Ingestion:** Automated ingestion and vector indexing of live OEM settings manifests.
+2. **Multilingual Query Normalization:** Support for multilingual user queries across 20+ languages.
+3. **On-Device Micro-Embedding Execution:** Running lightweight on-device embedding models directly inside the troubleshooting client.

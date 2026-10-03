@@ -1,0 +1,153 @@
+{
+  "_meta": {
+    "type": "PROTOTYPE_FIXTURE",
+    "description": "Prototype masked in-device settings deeplink catalog for demonstration and evaluation purposes. All deeplinks are masked representations.",
+    "isAuthenticProprietaryData": false
+  },
+  "deeplinks": [
+    {
+      "id": "DL_DISP_001",
+      "uri": "bixby://masked/settings/display",
+      "actionName": "Display Settings",
+      "domain": "Display",
+      "parentMenu": "Settings",
+      "screenPath": "Settings > Display",
+      "depth": 1,
+      "intentDescription": "Main display settings menu including brightness, dark mode, screen timeout, and general visual preferences.",
+      "keywords": ["display", "screen", "brightness", "dark mode", "eye comfort", "resolution"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/display/verify"
+    },
+    {
+      "id": "DL_DISP_002",
+      "uri": "bixby://masked/settings/display/navigation_bar",
+      "actionName": "Navigation Bar Settings",
+      "domain": "Display",
+      "parentMenu": "Display Settings",
+      "screenPath": "Settings > Display > Navigation bar",
+      "depth": 2,
+      "intentDescription": "Specific navigation bar screen for configuring swipe gestures, gesture hints, swipe direction, and button layout.",
+      "keywords": ["navigation bar", "swipe navigation", "swipe gestures", "navigation buttons", "swipe gestures orientation", "gestures direction", "back gesture", "navigation_bar"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/display/navigation_bar/verify"
+    },
+    {
+      "id": "DL_DISP_003",
+      "uri": "bixby://masked/settings/display/screen_timeout",
+      "actionName": "Screen Timeout Settings",
+      "domain": "Display",
+      "parentMenu": "Display Settings",
+      "screenPath": "Settings > Display > Screen timeout",
+      "depth": 2,
+      "intentDescription": "Screen timeout duration configuration screen.",
+      "keywords": ["screen timeout", "sleep time", "auto lock timer", "screen stay on", "screen off timeout"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/display/screen_timeout/verify"
+    },
+    {
+      "id": "DL_BATT_001",
+      "uri": "bixby://masked/settings/battery",
+      "actionName": "Battery Settings",
+      "domain": "Battery",
+      "parentMenu": "Settings",
+      "screenPath": "Settings > Battery and device care > Battery",
+      "depth": 1,
+      "intentDescription": "Main battery overview showing usage charts, power mode, and background limits.",
+      "keywords": ["battery", "power", "battery drain", "battery life", "device care battery"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/battery/verify"
+    },
+    {
+      "id": "DL_BATT_002",
+      "uri": "bixby://masked/settings/battery/power_saving",
+      "actionName": "Power Saving Mode",
+      "domain": "Battery",
+      "parentMenu": "Battery Settings",
+      "screenPath": "Settings > Battery and device care > Battery > Power saving",
+      "depth": 2,
+      "intentDescription": "Power saving mode configuration screen for limiting CPU, background network, and screen brightness to conserve battery.",
+      "keywords": ["power saving", "battery saver", "low power mode", "conserve power", "battery saving mode", "power_saving"],
+      "controlType": "toggle_screen",
+      "validationUri": "bixby://masked/settings/battery/power_saving/verify"
+    },
+    {
+      "id": "DL_BATT_003",
+      "uri": "bixby://masked/settings/battery/background_usage_limits",
+      "actionName": "Background Usage Limits",
+      "domain": "Battery",
+      "parentMenu": "Battery Settings",
+      "screenPath": "Settings > Battery and device care > Battery > Background usage limits",
+      "depth": 2,
+      "intentDescription": "Manage sleeping apps, deep sleeping apps, and apps draining battery in the background.",
+      "keywords": ["background apps", "sleeping apps", "deep sleeping apps", "background battery drain", "app power management", "background_usage_limits"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/battery/background_usage_limits/verify"
+    },
+    {
+      "id": "DL_CAM_001",
+      "uri": "bixby://masked/settings/camera",
+      "actionName": "Camera Settings",
+      "domain": "Camera",
+      "parentMenu": "Camera App",
+      "screenPath": "Camera > Settings",
+      "depth": 1,
+      "intentDescription": "Camera app general settings including scene optimizer, resolution, and grid lines.",
+      "keywords": ["camera settings", "camera options", "photo settings", "camera app"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/camera/verify"
+    },
+    {
+      "id": "DL_CAM_002",
+      "uri": "bixby://masked/settings/camera/reset",
+      "actionName": "Reset Camera Settings",
+      "domain": "Camera",
+      "parentMenu": "Camera Settings",
+      "screenPath": "Camera > Settings > Reset settings",
+      "depth": 2,
+      "intentDescription": "Reset camera preferences and autofocus/picture modes back to default factory parameters.",
+      "keywords": ["reset camera", "restore camera defaults", "camera reset", "camera focus reset", "camera blurry reset", "camera/reset"],
+      "controlType": "dialog",
+      "validationUri": "bixby://masked/settings/camera/reset/verify"
+    },
+    {
+      "id": "DL_PERF_001",
+      "uri": "bixby://masked/settings/device_care/storage",
+      "actionName": "Device Storage Management",
+      "domain": "Performance",
+      "parentMenu": "Settings",
+      "screenPath": "Settings > Battery and device care > Storage",
+      "depth": 2,
+      "intentDescription": "Inspect device storage, delete cached files, trash, and clear unused large apps.",
+      "keywords": ["storage", "free up space", "device storage", "clear cache", "low storage memory", "device_care/storage"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/device_care/storage/verify"
+    },
+    {
+      "id": "DL_PERF_002",
+      "uri": "bixby://masked/settings/device_care/memory",
+      "actionName": "RAM Memory Cleaner",
+      "domain": "Performance",
+      "parentMenu": "Settings",
+      "screenPath": "Settings > Battery and device care > Memory",
+      "depth": 2,
+      "intentDescription": "RAM Plus and active memory cleaner to stop background processes causing lag.",
+      "keywords": ["ram", "memory", "ram plus", "phone slow", "device lag", "clean memory", "boost performance", "device_care/memory"],
+      "controlType": "screen",
+      "validationUri": "bixby://masked/settings/device_care/memory/verify"
+    },
+    {
+      "id": "DL_SYS_RESET_001",
+      "uri": "bixby://masked/settings/general/factory_reset",
+      "actionName": "Factory Data Reset",
+      "domain": "Performance",
+      "parentMenu": "Settings",
+      "screenPath": "Settings > General management > Reset > Factory data reset",
+      "depth": 3,
+      "intentDescription": "Erase all user data and restore the device to original factory state. This is a disruptive critical action.",
+      "keywords": ["factory reset", "erase device", "wipe phone", "master reset", "hard reset", "general/factory_reset"],
+      "controlType": "critical_dialog",
+      "validationUri": "bixby://masked/settings/general/factory_reset/verify"
+    }
+  ],
+  "genericFallbackDeeplink": "bixby://dummy_positive"
+}

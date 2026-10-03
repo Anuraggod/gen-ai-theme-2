@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Guided Troubleshooting Engine | Theme 2</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Smart Guided Troubleshooting Engine</h1>
+          <p class="subtitle">Natural-Language Intent Normalization & Deeplink Mapping Pipeline (Theme 2)</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-system" id="serviceStatus">● Engine Active</span>
+        <span class="badge badge-version">v1.0.0</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Input Panel -->
+      <section class="card input-card">
+        <div class="card-header">
+          <h2>Describe Customer Complaint</h2>
+          <span class="hint">Enter vague, colloquial, or frustrated customer complaint</span>
+        </div>
+
+        <div class="input-group">
+          <textarea
+            id="queryInput"
+            rows="3"
+            placeholder="e.g. My phone swipe thing is going up and down instead of left and right"
+          ></textarea>
+        </div>
+
+        <!-- Domain & Presets -->
+        <div class="presets-row">
+          <div class="domain-selector">
+            <label for="domainSelect">Device Domain Hint:</label>
+            <select id="domainSelect">
+              <option value="">Auto Detect Domain</option>
+              <option value="Display">Display & Navigation</option>
+              <option value="Battery">Battery & Power</option>
+              <option value="Camera">Camera & Focus</option>
+              <option value="Performance">Performance & Lag</option>
+            </select>
+          </div>
+
+          <div class="sample-queries">
+            <span class="label">Quick Samples:</span>
+            <button class="sample-btn" data-query="My phone swipe thing is going up and down instead of left and right" data-domain="Display">Swipe Inverted</button>
+            <button class="sample-btn" data-query="battery drains very fast in just two hours" data-domain="Battery">Battery Drain</button>
+            <button class="sample-btn" data-query="camera photos look all blurry and autofocus is stuck" data-domain="Camera">Blurry Camera</button>
+            <button class="sample-btn" data-query="phone is super laggy and UI keeps freezing" data-domain="Performance">System Lag</button>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button id="troubleshootBtn" class="primary-btn">
+            <span class="btn-text">Generate Troubleshooting Plan</span>
+            <span class="spinner hidden" id="loadingSpinner"></span>
+          </button>
+          <button id="clearCacheBtn" class="secondary-btn" title="Clear Fast-Path Cache for testing cold response">
+            Clear Cache
+          </button>
+        </div>
+      </section>
+
+      <!-- Results Panel -->
+      <section class="card results-card" id="resultsSection" style="display: none;">
+        <div class="results-header">
+          <div class="metrics-bar">
+            <div class="metric-item">
+              <span class="metric-label">Cache Status:</span>
+              <span class="badge" id="cacheBadge">MISS</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Execution Latency:</span>
+              <span class="metric-value" id="latencyValue">0 ms</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Confidence Score:</span>
+              <span class="metric-value score-highlight" id="scoreValue">0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan Goal & Title -->
+        <div class="plan-summary-box">
+          <div class="goal-text" id="goalDisplay">Follow these steps...</div>
+          <div class="title-text" id="titleDisplay">Issue Title</div>
+        </div>
+
+        <!-- Actions Accordion/List -->
+        <div class="actions-container" id="actionsList">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Query Enrichment Accordion -->
+        <details class="variations-accordion" id="variationsDetails">
+          <summary class="accordion-summary">
+            <span>Query Enrichment: <strong id="variationCountDisplay">0</strong> Register Variations Generated</span>
+          </summary>
+          <div class="variations-grid" id="variationsGrid">
+            <!-- Populated dynamically -->
+          </div>
+        </details>
+
+        <!-- Raw JSON output tab -->
+        <details class="json-accordion">
+          <summary class="accordion-summary">
+            <span>View Validated API Contract JSON</span>
+          </summary>
+          <pre class="json-viewer" id="jsonViewer"></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Theme 2: Smart Guided Troubleshooting Engine Prototype &bull; Exact Catalog Deeplink Integrity &bull; Sub-300ms Fast-Path Caching</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

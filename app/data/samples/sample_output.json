@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "type": "PROTOTYPE_FIXTURE",
+    "description": "Sample validated troubleshooting output demonstrating strict compliance with schema and constraints.",
+    "isAuthenticProprietaryData": false
+  },
+  "query": "phone swipe navigation moves up and down instead of left and right",
+  "expectedOutput": {
+    "contexts": [
+      {
+        "goal": "Follow these steps to perform this Swipe Navigation Troubleshooting",
+        "title": "Swipe navigation settings",
+        "score": 0.95,
+        "action": [
+          {
+            "actionName": "Navigation Bar Settings",
+            "description": "It will configure navigation preferences",
+            "category": "auto",
+            "stepGroups": [
+              {
+                "steps": [
+                  "Navigate to and open Settings.",
+                  "Tap Display.",
+                  "Tap Navigation bar.",
+                  "Select the preferred navigation type."
+                ],
+                "actionableDeeplink": "bixby://masked/settings/display/navigation_bar",
+                "validationDeeplink": "bixby://masked/settings/display/navigation_bar/verify"
+              }
+            ]
+          },
+          {
+            "actionName": "Restart in Safe Mode",
+            "description": "It will isolate conflicting applications",
+            "category": "critical",
+            "stepGroups": [
+              {
+                "steps": [
+                  "Press and hold the Power button.",
+                  "Tap and hold the Power off icon.",
+                  "Tap Safe mode to reboot."
+                ],
+                "actionableDeeplink": null,
+                "validationDeeplink": null
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

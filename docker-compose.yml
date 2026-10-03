@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  troubleshooting-engine:
+    build: .
+    container_name: smart-troubleshooting-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8000
+      - HOST=0.0.0.0
+      - SEMANTIC_CACHE_THRESHOLD=0.82
+    restart: unless-stopped

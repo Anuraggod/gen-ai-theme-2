@@ -1,0 +1,193 @@
+{
+  "_meta": {
+    "type": "PROTOTYPE_FIXTURE",
+    "description": "Prototype customer reference knowledgebase fixtures for grounded troubleshooting extraction.",
+    "isAuthenticProprietaryData": false
+  },
+  "articles": [
+    {
+      "id": "SIIS_DISP_NAV_01",
+      "domain": "Display",
+      "topic": "Swipe Navigation",
+      "symptoms": [
+        "swipe navigation moving up and down instead of left and right",
+        "phone gestures inverted",
+        "navigation bar direction wrong",
+        "gestures broken after installing launcher"
+      ],
+      "referenceContent": "When swipe navigation gestures move vertically rather than horizontally, the navigation bar type or gesture hints have been reconfigured. First, open Settings on your device. Next, tap Display. Then, tap Navigation bar. Select Swipe gestures and choose your preferred gesture orientation from More options. Finally, if third-party gesture apps interfere, reboot your phone into Safe Mode to test default behavior.",
+      "recommendedActions": [
+        {
+          "actionName": "Navigation Bar Settings",
+          "category": "auto",
+          "targetScreenKeyword": "navigation_bar",
+          "description": "It will configure navigation preferences",
+          "steps": [
+            "Navigate to and open Settings.",
+            "Tap Display.",
+            "Tap Navigation bar.",
+            "Select the preferred navigation type."
+          ]
+        },
+        {
+          "actionName": "Restart in Safe Mode",
+          "category": "critical",
+          "targetScreenKeyword": null,
+          "description": "It will isolate conflicting applications",
+          "steps": [
+            "Press and hold the Power button.",
+            "Tap and hold the Power off icon.",
+            "Tap Safe mode to reboot."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SIIS_BATT_DRAIN_01",
+      "domain": "Battery",
+      "topic": "Battery Drain",
+      "symptoms": [
+        "battery drains very fast",
+        "phone dying quickly",
+        "battery percentage drops rapidly",
+        "excessive background power usage"
+      ],
+      "referenceContent": "If your phone battery is draining quickly, enable Power Saving Mode to limit background network syncing and CPU frequency. Open Settings, tap Battery and device care, tap Battery, and toggle Power saving. Next, check Background usage limits to put unused apps into deep sleep. If the phone still loses charge rapidly, inspect the physical USB charging port for debris or moisture.",
+      "recommendedActions": [
+        {
+          "actionName": "Power Saving Mode",
+          "category": "auto",
+          "targetScreenKeyword": "power_saving",
+          "description": "It will reduce background power consumption",
+          "steps": [
+            "Open Settings.",
+            "Tap Battery and device care.",
+            "Tap Battery.",
+            "Turn on Power saving mode."
+          ]
+        },
+        {
+          "actionName": "Background Usage Limits",
+          "category": "auto",
+          "targetScreenKeyword": "background_usage_limits",
+          "description": "It will restrict unused background apps",
+          "steps": [
+            "Open Settings.",
+            "Tap Battery and device care.",
+            "Tap Background usage limits.",
+            "Enable Put unused apps to sleep."
+          ]
+        },
+        {
+          "actionName": "Clean Charging Port",
+          "category": "manual",
+          "targetScreenKeyword": null,
+          "description": "It will remove port lint buildup",
+          "steps": [
+            "Power off your device completely.",
+            "Inspect the USB port with light.",
+            "Gently clear lint with dry toothpick."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SIIS_CAM_BLUR_01",
+      "domain": "Camera",
+      "topic": "Camera Focus",
+      "symptoms": [
+        "camera is blurry and out of focus",
+        "cannot focus photos",
+        "camera app autofocus stuck",
+        "photos look fuzzy"
+      ],
+      "referenceContent": "When camera images appear blurry, first wipe the exterior camera lens gently with a microfiber cloth to remove smudges. Next, open the Camera app, tap Settings, and tap Reset settings to restore default autofocus calibration. If camera lag or black screen persists, perform a system restart.",
+      "recommendedActions": [
+        {
+          "actionName": "Clean Camera Lens",
+          "category": "manual",
+          "targetScreenKeyword": null,
+          "description": "It will remove lens surface smudges",
+          "steps": [
+            "Take a clean dry microfiber cloth.",
+            "Gently wipe each camera lens.",
+            "Ensure no dust or oil remains."
+          ]
+        },
+        {
+          "actionName": "Reset Camera Settings",
+          "category": "auto",
+          "targetScreenKeyword": "camera/reset",
+          "description": "It will restore default camera calibration",
+          "steps": [
+            "Open the Camera application.",
+            "Tap the Settings gear icon.",
+            "Scroll down and tap Reset settings.",
+            "Confirm by tapping Reset."
+          ]
+        },
+        {
+          "actionName": "Reboot Device",
+          "category": "critical",
+          "targetScreenKeyword": null,
+          "description": "It will restart device camera services",
+          "steps": [
+            "Swipe down the Quick Settings panel.",
+            "Tap the Power icon.",
+            "Tap Restart."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SIIS_PERF_LAG_01",
+      "domain": "Performance",
+      "topic": "Device Performance",
+      "symptoms": [
+        "phone is lagging and freezing",
+        "apps taking long time to open",
+        "device sluggish and slow",
+        "low memory causing stutter"
+      ],
+      "referenceContent": "If the phone experiences lag and UI stuttering, clear background RAM and optimize storage. Open Settings, tap Battery and device care, tap Memory, and tap Clean now to terminate idle background tasks. Next, tap Storage to delete temporary cache files. If performance remains severely degraded, consider a Factory data reset after backing up your data.",
+      "recommendedActions": [
+        {
+          "actionName": "RAM Memory Cleaner",
+          "category": "auto",
+          "targetScreenKeyword": "device_care/memory",
+          "description": "It will terminate idle background tasks",
+          "steps": [
+            "Open Settings.",
+            "Tap Battery and device care.",
+            "Tap Memory.",
+            "Tap Clean now to free RAM."
+          ]
+        },
+        {
+          "actionName": "Device Storage Management",
+          "category": "auto",
+          "targetScreenKeyword": "device_care/storage",
+          "description": "It will clear cached junk files",
+          "steps": [
+            "Open Settings.",
+            "Tap Battery and device care.",
+            "Tap Storage.",
+            "Clear cached files and trash."
+          ]
+        },
+        {
+          "actionName": "Factory Data Reset",
+          "category": "critical",
+          "targetScreenKeyword": "general/factory_reset",
+          "description": "It will restore original factory system",
+          "steps": [
+            "Open Settings and tap General management.",
+            "Tap Reset.",
+            "Tap Factory data reset.",
+            "Review warnings and tap Reset."
+          ]
+        }
+      ]
+    }
+  ]
+}

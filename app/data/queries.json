@@ -1,0 +1,65 @@
+{
+  "_meta": {
+    "type": "PROTOTYPE_FIXTURE",
+    "description": "Prototype canonical user troubleshooting queries across primary domains.",
+    "isAuthenticProprietaryData": false
+  },
+  "test_queries": [
+    {
+      "domain": "Display",
+      "canonical": "phone swipe navigation moves up and down instead of left and right",
+      "variations": [
+        {"register": "formal", "text": "Swipe gesture navigation orientation moves vertically rather than horizontally."},
+        {"register": "casual", "text": "My phone swipe thing is going up and down instead of left and right."},
+        {"register": "keyword", "text": "swipe navigation direction wrong settings"},
+        {"register": "frustrated", "text": "Why are my gestures inverted after the update it is unusable!"},
+        {"register": "typo", "text": "phone swip navigaton movs up and dwn"},
+        {"register": "intent", "text": "How to change swipe gesture navigation bar orientation"},
+        {"register": "question", "text": "Where do I fix the swipe gesture direction on my screen?"},
+        {"register": "symptom", "text": "Screen navigation swipe inverted vertically"}
+      ]
+    },
+    {
+      "domain": "Battery",
+      "canonical": "battery drains very fast throughout the day",
+      "variations": [
+        {"register": "formal", "text": "Excessive battery discharge rate observed during standard operating conditions."},
+        {"register": "casual", "text": "My phone battery dies super fast now."},
+        {"register": "keyword", "text": "battery drain fast power saving"},
+        {"register": "frustrated", "text": "Battery drops from 100 to 20 in 2 hours fix this!"},
+        {"register": "typo", "text": "batry draning vry fast power saver"},
+        {"register": "intent", "text": "How to enable power saving and limit background battery drain"},
+        {"register": "question", "text": "Why is my battery draining so quickly?"},
+        {"register": "symptom", "text": "Rapid battery percentage decrease"}
+      ]
+    },
+    {
+      "domain": "Camera",
+      "canonical": "camera is blurry and out of focus",
+      "variations": [
+        {"register": "formal", "text": "Camera autofocus mechanism fails to achieve sharp focal clarity."},
+        {"register": "casual", "text": "Pictures look all fuzzy and camera wont focus."},
+        {"register": "keyword", "text": "camera blurry autofocus reset settings"},
+        {"register": "frustrated", "text": "My camera is completely out of focus and ruined all my photos!"},
+        {"register": "typo", "text": "camra blury and out of focs"},
+        {"register": "intent", "text": "How to clean lens and reset camera autofocus settings"},
+        {"register": "question", "text": "How can I fix a blurry camera on my phone?"},
+        {"register": "symptom", "text": "Fuzzy photos and failure to autofocus"}
+      ]
+    },
+    {
+      "domain": "Performance",
+      "canonical": "phone is lagging and freezing during app usage",
+      "variations": [
+        {"register": "formal", "text": "System responsiveness is degraded with noticeable frame drops and UI freezing."},
+        {"register": "casual", "text": "My phone is super laggy and apps take forever to open."},
+        {"register": "keyword", "text": "phone lag clean memory storage"},
+        {"register": "frustrated", "text": "Everything is freezing and crashing, it is so slow!"},
+        {"register": "typo", "text": "phon laging and frezing constantly"},
+        {"register": "intent", "text": "How to clear RAM memory and storage cache to speed up device"},
+        {"register": "question", "text": "What steps stop my phone from stuttering and lagging?"},
+        {"register": "symptom", "text": "UI stutter, high memory pressure, and sluggish response"}
+      ]
+    }
+  ]
+}
