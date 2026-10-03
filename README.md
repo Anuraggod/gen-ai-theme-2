@@ -1,6 +1,16 @@
 # Smart Guided Troubleshooting Engine — Working Prototype
 
-> An intelligent troubleshooting engine that transforms vague, colloquial customer complaints into structured, deterministic troubleshooting plans with exact catalog-matched in-device deeplinks.
+> An intelligent troubleshooting engine that transforms vague, colloquial customer complaints into structured, deterministic troubleshooting plans with exact catalog-matched in-device settings deeplinks.
+
+---
+
+## 📚 Project Resources
+
+| Resource | Link |
+|---|---|
+| 📊 Project PPT | [ADD PPT LINK HERE] |
+| 🎥 Video Demo | [ADD VIDEO DEMO LINK HERE] |
+| 💻 GitHub Repository | https://github.com/Anuraggod/gen-ai-theme-2 |
 
 ---
 
@@ -10,11 +20,11 @@ Modern smartphone users frequently encounter device issues and describe their co
 
 The **Smart Guided Troubleshooting Engine** provides an automated, deterministic pipeline that:
 1. **Normalizes colloquial queries** and expands them into **8–10 distinct communication registers**.
-2. **Extracts structured troubleshooting actions strictly grounded in reference knowledge**, refusing to hallucinate instructions when no grounded reference exists.
+2. **Extracts structured troubleshooting actions strictly grounded in reference knowledge**, refusing to hallucinate instructions when no grounded reference exists (`NO_GROUNDED_PLAN`).
 3. **Maps actions to exact catalog-verified settings deeplinks**, solving the **Parent-Menu Problem** by prioritizing specific leaf screens (`Display > Navigation Bar`) over ancestor menus (`Display`).
 4. **Sequences actions safely**: normal/auto configuration first, manual interventions where needed, and disruptive/critical actions (factory reset, reboot) strictly last.
 5. **Enforces strict schema compliance & Zero URL Leakage** (no raw HTTP/HTTPS/Markdown links) through non-silent deterministic validation.
-6. **Delivers sub-millisecond responses (< 300ms SLA target)** via a dual-tier **Fast-Path Lexical Semantic Cache** (Exact SHA256 + Term/Bigram Cosine Similarity).
+6. **Delivers sub-millisecond responses (< 300ms target)** via a dual-tier **Fast-Path Lexical Semantic Cache** (Exact SHA256 + Term/Bigram Cosine Similarity).
 
 ---
 
@@ -96,6 +106,7 @@ Extracts troubleshooting goals, titles, scores, actions, and imperative steps st
 - **`critical`**: Disruptive actions (factory data reset, reboot, safe mode) -> ordered strictly last.
 
 ### 4.5 Fast-Path Lexical Semantic Cache
+- **Implementation:** Lexical semantic-similarity cache using normalized content terms and word bigrams.
 - **Tier 1 (Exact Hash):** SHA256 normalized query matching (< 0.05 ms).
 - **Tier 2 (Lexical Semantic Search):** Term and bigram cosine similarity matching over normalized content words (< 0.05 ms).
 - **Zero Cache Contamination:** Only fully validated plans from cold executions are stored; evaluation tests run against read-only primed snapshots.
@@ -111,7 +122,7 @@ Extracts troubleshooting goals, titles, scores, actions, and imperative steps st
 | **`score`** | Float bounded between `0.0 <= score <= 1.0` | Numeric boundary validator (Rejects out-of-bounds) |
 | **`actionName`** | Represents exactly **one physical screen or feature** | Screen-level grouping |
 | **`description`** | Strictly **5–7 words**, starting with `It will` | Token counter & prefix validator (Rejects on mismatch) |
-| **`steps`** | Imperative UI interactions, one action per step, **Zero URLs** | URL regex stripper & validator (Rejects on leak) |
+| **`steps`** | Imperative UI interactions, one action per step, **Zero URLs** | URL regex detector (Rejects on leak) |
 | **`actionableDeeplink`** | Must exist verbatim in catalog or be `bixby://dummy_positive` (or `None` for manual) | Strict catalog membership check |
 | **`category`** | `auto` first, `manual` where needed, `critical` strictly last | Sequence hierarchy validator (Rejects misordering) |
 | **Zero URL Leak** | Prohibits `http://`, `https://`, `www.`, markdown links | Programmatic regex detector (Strict rejection) |
@@ -222,9 +233,49 @@ Clears the fast-path semantic cache for cold-path testing.
 
 ---
 
-## 8. Setup & Running Instructions
+## 8. Live Demonstration Guide
 
-### 8.1 Local Installation
+The recommended end-to-end demo flow follows this execution sequence:
+
+```text
+User complaint
+      ↓
+Query enrichment (8-10 registers)
+      ↓
+Grounded reference matching (SIIS)
+      ↓
+Structure extraction & deeplink mapping (leaf screen prioritization)
+      ↓
+Action sequencing (auto -> manual -> critical last)
+      ↓
+Strict schema & zero-URL validation
+      ↓
+Fast-path lexical cache update
+      ↓
+Validated troubleshooting response
+```
+
+### Demonstration Scenario 1: Supported Colloquial Query
+- **User Query:** *"My phone swipe thing is going up and down instead of left and right"*
+- **Engine Processing:**
+  1. *Enrichment:* Normalizes to *"swipe navigation gesture moving vertically horizontally"* and generates 10 variations.
+  2. *Matching:* Finds grounded SIIS article `SIIS_DISP_NAV_01`.
+  3. *Deeplink Mapping:* Prioritizes specific leaf `bixby://masked/settings/display/navigation_bar` over generic parent `bixby://masked/settings/display`.
+  4. *Sequencing:* Puts `Navigation Bar Settings` (`auto`) first and `Restart in Safe Mode` (`critical`) last.
+  5. *Validation:* Confirms 2-3 word title, 5-7 word description starting with *"It will"*, and zero raw URLs.
+
+### Demonstration Scenario 2: Unsupported Query (Zero-Hallucination Fallback)
+- **User Query:** *"How to bake a chocolate cake on my phone"*
+- **Engine Processing:**
+  1. *Matching:* No grounded troubleshooting reference matches this query in the knowledgebase.
+  2. *Zero-Hallucination Behavior:* Refuses to synthesize fabricated device instructions.
+  3. *Result:* Returns `contexts: []` with `status: "NO_GROUNDED_PLAN"` and explanation message.
+
+---
+
+## 9. Setup & Running Instructions
+
+### 9.1 Local Installation
 ```bash
 # 1. Clone repository
 git clone https://github.com/Anuraggod/gen-ai-theme-2.git
@@ -239,27 +290,27 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 Access the interactive web UI at: **`http://localhost:8000`**
 Access interactive Swagger API docs at: **`http://localhost:8000/docs`**
 
-### 8.2 Docker Deployment
+### 9.2 Docker Deployment
 ```bash
 # Build and start via Docker Compose
 docker compose up --build
 ```
 
-### 8.3 Running Automated Tests
+### 9.3 Running Automated Tests
 ```bash
 python -m pytest tests -v
 ```
 
-### 8.4 Running Performance Benchmarks
+### 9.4 Running Performance Benchmarks
 ```bash
 python -m benchmarks.benchmark
 ```
 
 ---
 
-## 9. Performance & Evaluation Results
+## 10. Performance & Evaluation Results
 
-> **Benchmark Environment:** Windows 11, Python 3.14.5, AMD Ryzen / Intel Core CPU.
+> **Benchmark Environment:** Windows 11, Python 3.14.5, Local CPU.
 > **Methodology:** Measured using the uncontaminated benchmark harness (`benchmarks/benchmark.py`), with separate measurements for cold execution, exact cache hits, and unprimed semantic paraphrase retrieval.
 
 | Metric | Target SLA | Measured Result | Status |
@@ -270,41 +321,20 @@ python -m benchmarks.benchmark
 | **Fast-Path Semantic Hit P50** | < 300.00 ms | **0.021 ms** | ✅ PASS |
 | **Cold Pipeline P95** | Baseline | **0.862 ms** | ✅ PASS |
 | **Cold Pipeline P50** | Baseline | **0.417 ms** | ✅ PASS |
-| **Uncontaminated Semantic Paraphrase Hit Rate** | Prototype Lexical | **37.5%** | Measured |
+| **Uncontaminated Semantic Paraphrase Hit Rate** | Prototype Lexical | **37.5% (75/200)** | Measured |
 | **Automated Test Suite** | 100% Pass | **41 / 41 Passed** | ✅ PASS |
-
----
-
-## 10. Project Presentation & Demonstration Resources
-
-## 📊 Project Presentation
-
-**PPT:** [ADD PPT LINK HERE]
-
----
-
-## 🎥 Video Demonstration
-
-**Demo Video:** [ADD VIDEO DEMO LINK HERE]
-
----
-
-## 🔗 Project Resources
-
-| Resource | Link |
-|---|---|
-| 📊 PPT | [ADD PPT LINK HERE] |
-| 🎥 Video Demo | [ADD VIDEO DEMO LINK HERE] |
-| 💻 GitHub Repository | https://github.com/Anuraggod/gen-ai-theme-2.git |
 
 ---
 
 ## 📸 Screenshots
 
-### Main Interface
+### Main Dashboard
 <!-- Add screenshot here -->
 
 ### Troubleshooting Result
+<!-- Add screenshot here -->
+
+### Query Variations
 <!-- Add screenshot here -->
 
 ### API Response
