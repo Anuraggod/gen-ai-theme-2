@@ -3,10 +3,10 @@ pipeline.py - Core Orchestrator for the Smart Guided Troubleshooting Engine.
 Coordinates:
 0. Fast-Path Caching (< 300ms)
 1. Query Enrichment (8-10 variations)
-2. Structure Extraction (grounded in reference)
+2. Grounded Structure Extraction (refuses ungrounded fabrication)
 3. Deeplink Mapping & Parent-Menu Disambiguation
 4. Action Sequencing (auto -> manual -> critical last)
-5. Deterministic Validation & Zero-URL Leak Gate
+5. Strict Deterministic Validation Gate & Zero-URL Leak Gate
 """
 
 import time
@@ -22,7 +22,8 @@ from app.cache.semantic_cache import FastPathSemanticCache
 
 class TroubleshootingPipeline:
     """
-    End-to-end troubleshooting pipeline adhering strictly to the Theme 2 specification.
+    End-to-end troubleshooting pipeline adhering strictly to Theme 2 specifications
+    and zero-hallucination source grounding rules.
     """
 
     def __init__(self):
@@ -64,12 +65,30 @@ class TroubleshootingPipeline:
         domain = enrichment_result["domain"]
         variations = enrichment_result["variations"]
 
-        # Step 3: Grounded Structure Extraction
+        # Step 3: Grounded Structure Extraction (Zero-Hallucination)
         extracted_data = self.extractor.extract_structure(
             normalized_query=normalized_q,
             domain=domain,
             custom_reference=request.referenceContext
         )
+
+        if not extracted_data:
+            # If no grounded reference exists, return empty contexts rather than hallucinating steps
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            return TroubleshootResponse(
+                contexts=[],
+                metadata={
+                    "status": "NO_GROUNDED_PLAN",
+                    "message": "No grounded troubleshooting instructions available for this query.",
+                    "cache_hit": False,
+                    "cache_hit_type": "MISS",
+                    "latency_ms": round(elapsed_ms, 2),
+                    "execution_path": "COLD_PIPELINE",
+                    "domain": domain,
+                    "query_variations": variations,
+                    "variation_count": len(variations)
+                }
+            )
 
         # Step 4: Deeplink Mapping with Parent-Menu Protection
         mapped_actions = []
@@ -84,7 +103,7 @@ class TroubleshootingPipeline:
         # Step 5: Action Sequencing (auto -> manual -> critical last)
         sequenced_actions = self.sequencer.sequence_actions(mapped_actions)
 
-        # Build raw plan candidate
+        # Build raw candidate plan
         raw_plan = {
             "goal": extracted_data["goal"],
             "title": extracted_data["title"],
@@ -92,45 +111,36 @@ class TroubleshootingPipeline:
             "action": sequenced_actions
         }
 
-        # Step 6: Deterministic Validation & Zero-URL Leak Sanitization
-        is_valid, validated_goal, errors = self.validator.validate_and_sanitize_plan(raw_plan, domain=domain)
+        # Step 6: Strict Deterministic Validation & Zero-URL Leak Gate
+        is_valid, validated_goal, errors = self.validator.validate_plan(raw_plan)
 
         if not is_valid or validated_goal is None:
-            # Fallback safe plan
-            fallback_dict = {
-                "goal": f"Follow these steps to perform this {domain} Troubleshooting",
-                "title": f"{domain} settings issue",
-                "score": 0.50,
-                "action": [
-                    {
-                        "actionName": f"{domain} Settings",
-                        "description": f"It will configure {domain.lower()} preferences",
-                        "category": "auto",
-                        "stepGroups": [
-                            {
-                                "steps": [
-                                    "Open Settings on your device.",
-                                    f"Tap {domain}.",
-                                    "Adjust the settings to resolve the issue."
-                                ],
-                                "actionableDeeplink": "bixby://dummy_positive",
-                                "validationDeeplink": None
-                            }
-                        ]
-                    }
-                ]
-            }
-            _, validated_goal, _ = self.validator.validate_and_sanitize_plan(fallback_dict, domain=domain)
+            # Reject invalid output strictly
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            return TroubleshootResponse(
+                contexts=[],
+                metadata={
+                    "status": "VALIDATION_FAILED",
+                    "validation_errors": errors,
+                    "cache_hit": False,
+                    "cache_hit_type": "MISS",
+                    "latency_ms": round(elapsed_ms, 2),
+                    "execution_path": "COLD_PIPELINE",
+                    "domain": domain,
+                    "query_variations": variations,
+                    "variation_count": len(variations)
+                }
+            )
 
-        # Step 7: Store Validated Plan in Semantic Cache
-        if validated_goal:
-            self.cache.put(normalized_q, validated_goal)
+        # Step 7: Store Only Validated Plans in Semantic Cache
+        self.cache.put(normalized_q, validated_goal)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
         return TroubleshootResponse(
-            contexts=[validated_goal] if validated_goal else [],
+            contexts=[validated_goal],
             metadata={
+                "status": "SUCCESS",
                 "cache_hit": False,
                 "cache_hit_type": "MISS",
                 "latency_ms": round(elapsed_ms, 2),

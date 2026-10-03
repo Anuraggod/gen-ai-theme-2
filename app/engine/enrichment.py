@@ -8,26 +8,25 @@ import re
 from typing import List, Dict, Any, Tuple
 
 
-# Slang & Colloquialisms normalization map
+# Slang & Colloquialisms normalization patterns
 COLLOQUIAL_MAP = {
-    r"\bswipe thing\b": "swipe navigation gesture",
+    r"\bswipe\s+thing\b": "swipe navigation gesture",
     r"\bswiping\b": "swipe gesture navigation",
-    r"\bgoing up and down\b": "moving vertically",
-    r"\bleft and right\b": "horizontally",
-    r"\bdies super fast\b": "drains rapidly",
-    r"\bdrains fast\b": "rapid battery depletion",
-    r"\bdying fast\b": "rapid battery depletion",
+    r"\b(moves|moving|goes|going)\s+(up\s+and\s+down|vertically)\b": "moving vertically",
+    r"\b(up\s+and\s+down)\b": "moving vertically",
+    r"\b(left\s+and\s+right)\b": "horizontally",
+    r"\b(dies|dying|draining|drains)\s+(super\s+fast|very\s+fast|fast|quickly)\b": "drains rapidly",
     r"\bfuzzy\b": "blurry out of focus",
     r"\blaggy\b": "system lag UI stutter",
     r"\bfreezing\b": "system freeze sluggish performance",
-    r"\bwont focus\b": "autofocus failure",
-    r"\bwon't focus\b": "autofocus failure",
-    r"\bpower saver\b": "power saving mode",
+    r"\b(wont|won't)\s+focus\b": "autofocus failure",
+    r"\bpower\s+saver\b": "power saving mode",
     r"\bbatry\b": "battery",
     r"\bphon\b": "phone",
     r"\bcamra\b": "camera",
     r"\bblury\b": "blurry",
-    r"\bnavigaton\b": "navigation"
+    r"\bnavigaton\b": "navigation",
+    r"\bgesturs\b": "gestures"
 }
 
 # Domain keywords mapping
@@ -68,7 +67,7 @@ class QueryEnricher:
         Cleans and normalizes query text into standard technical terminology.
         """
         normalized = raw_query.strip()
-        # Clean extra whitespace and punctuation
+        # Clean extra punctuation
         normalized = re.sub(r"[^\w\s\-\']", " ", normalized)
         normalized = re.sub(r"\s+", " ", normalized).strip()
 
@@ -166,7 +165,6 @@ class QueryEnricher:
                 {"register": "contextual", "text": "Device experiences heavy lag and app slowdown during multitasking."}
             ]
 
-        # Ensure between 8 and 10 variations
         return variations[:10]
 
     def enrich(self, raw_query: str, domain_hint: str = None) -> Dict[str, Any]:

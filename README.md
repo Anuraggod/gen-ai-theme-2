@@ -10,11 +10,11 @@ Modern smartphone users frequently encounter device issues and describe their co
 
 The **Smart Guided Troubleshooting Engine** provides an automated, deterministic pipeline that:
 1. **Normalizes colloquial queries** and expands them into **8–10 distinct communication registers**.
-2. **Extracts structured troubleshooting actions grounded in reference knowledge** without hallucinating instructions.
+2. **Extracts structured troubleshooting actions strictly grounded in reference knowledge**, refusing to hallucinate instructions when no grounded reference exists.
 3. **Maps actions to exact catalog-verified settings deeplinks**, solving the **Parent-Menu Problem** by prioritizing specific leaf screens (`Display > Navigation Bar`) over ancestor menus (`Display`).
 4. **Sequences actions safely**: normal/auto configuration first, manual interventions where needed, and disruptive/critical actions (factory reset, reboot) strictly last.
-5. **Enforces strict schema compliance & Zero URL Leakage** (no raw HTTP/HTTPS/Markdown links).
-6. **Delivers sub-300ms responses** via a dual-tier **Fast-Path Semantic Cache** (Exact SHA256 + Vector Cosine Similarity).
+5. **Enforces strict schema compliance & Zero URL Leakage** (no raw HTTP/HTTPS/Markdown links) through non-silent deterministic validation.
+6. **Delivers sub-millisecond responses (< 300ms SLA target)** via a dual-tier **Fast-Path Lexical Semantic Cache** (Exact SHA256 + Term/Bigram Cosine Similarity).
 
 ---
 
@@ -36,30 +36,33 @@ flowchart TD
         A["Customer Query"] --> B["REST API: POST /v1/troubleshoot"]
     end
 
-    subgraph FastPath["Fast-Path Cache Layer (< 300ms)"]
-        B --> C{"Fast-Path Cache"}
+    subgraph FastPath["Fast-Path Cache Layer (< 300ms SLA)"]
+        B --> C{"Fast-Path Lexical Cache"}
         C -- "Exact or Semantic HIT" --> D["Return Validated Cached Plan"]
     end
 
     subgraph ColdPipeline["Cold-Path Engine Pipeline"]
         C -- "Cache MISS" --> E["0. Query Enrichment (8-10 Variations)"]
         E --> F["1. Grounded Context Matching (SIIS Articles)"]
-        F --> G["2. Structure Extraction (Goals, Actions, Steps)"]
-        G --> H["3. Catalog Metadata Search & Deeplink Mapping"]
-        H --> I["4. Parent-Menu Disambiguation (Child > Parent)"]
-        I --> J["5. Action Categorization & Sequencing"]
+        F --> G{"Grounded Reference Exists?"}
+        G -- "No" --> H["Safe No-Plan Response (Zero Hallucination)"]
+        G -- "Yes" --> I["2. Structure Extraction (Goals, Actions, Steps)"]
+        I --> J["3. Catalog Metadata Search & Deeplink Mapping"]
+        J --> K["4. Parent-Menu Disambiguation (Child > Parent)"]
+        K --> L["5. Action Categorization & Sequencing"]
     end
 
     subgraph Validation["Deterministic Validation Gate"]
-        J --> K["6. Output Validator & Zero URL Leak Filter"]
-        K --> L{"Validation Passed?"}
-        L -- "Yes" --> M["Update Semantic Cache"]
-        L -- "Fallback" --> N["Safe Grounded Fallback"]
+        L --> M["6. Output Validator & Zero URL Leak Filter"]
+        M --> N{"Validation Passed?"}
+        N -- "Yes" --> O["Update Semantic Cache"]
+        N -- "No" --> P["Reject Invalid Plan"]
     end
 
-    M --> O["Structured JSON Response (contexts)"]
-    N --> O
-    D --> O
+    O --> Q["Structured JSON Response (contexts)"]
+    D --> Q
+    H --> Q
+    P --> Q
 ```
 
 ---
@@ -79,11 +82,11 @@ Transforms raw queries into normalized technical intent and generates **8–10 d
 - **Action-Oriented:** *"Adjust navigation bar settings to restore horizontal swipe gestures."*
 - **Contextual:** *"After recent update phone swipe navigation gestures inverted vertically."*
 
-### 4.2 Structure Extraction
-Extracts troubleshooting goals, titles, scores, actions, and imperative steps grounded in reference knowledge articles. Unsubstantiated or hallucinated instructions are strictly rejected.
+### 4.2 Structure Extraction (Zero-Hallucination)
+Extracts troubleshooting goals, titles, scores, actions, and imperative steps strictly grounded in reference knowledge articles. If no sufficiently matching reference exists, the engine returns an empty plan with `status: NO_GROUNDED_PLAN` rather than fabricating ungrounded instructions.
 
 ### 4.3 Deeplink Mapping & Parent-Menu Protection
-- **Verbatim Catalog Integrity:** Catalog URIs (e.g. `bixby://masked/...`) are copied exactly without string alteration or fabrication.
+- **Verbatim Catalog Integrity:** Catalog URIs (e.g. `bixby://masked/...`) are verified against the catalog and copied exactly without string alteration or fabrication.
 - **Parent-Menu Disambiguation:** Prioritizes deep leaf screens (`Settings > Display > Navigation bar`) over ancestor menus (`Settings > Display`) when specific settings keywords are matched.
 - **Fallback Placeholder:** Uses `bixby://dummy_positive` exclusively for valid settings screens not yet indexed in the catalog.
 
@@ -92,32 +95,32 @@ Extracts troubleshooting goals, titles, scores, actions, and imperative steps gr
 - **`manual`**: Physical intervention (cleaning port, wiping lens) -> `actionableDeeplink` is strictly `None`.
 - **`critical`**: Disruptive actions (factory data reset, reboot, safe mode) -> ordered strictly last.
 
-### 4.5 Fast-Path Semantic Cache
-- **Tier 1 (Exact Hash):** SHA256 normalized query matching (< 1ms).
-- **Tier 2 (Semantic Vector):** Cosine similarity matching over content terms and word bigrams (< 15ms).
-- **Guaranteed Sub-300ms SLA:** Cached responses are delivered in sub-millisecond times.
+### 4.5 Fast-Path Lexical Semantic Cache
+- **Tier 1 (Exact Hash):** SHA256 normalized query matching (< 0.05 ms).
+- **Tier 2 (Lexical Semantic Search):** Term and bigram cosine similarity matching over normalized content words (< 0.05 ms).
+- **Zero Cache Contamination:** Only fully validated plans from cold executions are stored; evaluation tests run against read-only primed snapshots.
 
 ---
 
-## 5. Output Contract & Validation Rules
+## 5. Output Contract & Strict Validation Rules
 
 | Field | Rule / Constraint | Validation Mechanism |
 |---|---|---|
-| **`goal`** | Must follow `Follow these steps to perform this <Topic> Troubleshooting` or `... Configuration` | Strict Regex Matcher |
-| **`title`** | Strictly **2–3 words**, sentence case, core issue | Programmatic word counter & case formatter |
-| **`score`** | Float bounded between `0.0 <= score <= 1.0` | Numeric boundary validator |
+| **`goal`** | Must match `Follow these steps to perform this <Topic> Troubleshooting` or `... Configuration` | Strict Regex Matcher (Rejects on mismatch) |
+| **`title`** | Strictly **2–3 words**, sentence case, core issue | Programmatic word counter (Rejects on mismatch) |
+| **`score`** | Float bounded between `0.0 <= score <= 1.0` | Numeric boundary validator (Rejects out-of-bounds) |
 | **`actionName`** | Represents exactly **one physical screen or feature** | Screen-level grouping |
-| **`description`** | Strictly **5–7 words**, starting with `It will` | Token-count assertion + prefix validator |
-| **`steps`** | Imperative UI interactions, one action per step, **Zero URLs** | URL regex stripper & validator |
-| **`actionableDeeplink`** | Exact catalog URI or `None` for manual actions | Verbatim catalog integrity gate |
-| **`category`** | `auto` first, `manual` where needed, `critical` strictly last | Deterministic sequencer |
-| **Zero URL Leak** | Prohibits `http://`, `https://`, `www.`, markdown links | Programmatic regex sanitizer & rejection |
+| **`description`** | Strictly **5–7 words**, starting with `It will` | Token counter & prefix validator (Rejects on mismatch) |
+| **`steps`** | Imperative UI interactions, one action per step, **Zero URLs** | URL regex stripper & validator (Rejects on leak) |
+| **`actionableDeeplink`** | Must exist verbatim in catalog or be `bixby://dummy_positive` (or `None` for manual) | Strict catalog membership check |
+| **`category`** | `auto` first, `manual` where needed, `critical` strictly last | Sequence hierarchy validator (Rejects misordering) |
+| **Zero URL Leak** | Prohibits `http://`, `https://`, `www.`, markdown links | Programmatic regex detector (Strict rejection) |
 
 ---
 
 ## 6. Datasets & Source Grounding
 
-> **Note on Data Provenance:** As per project guidelines, the datasets provided in `app/data/` are clearly labeled **demo/prototype fixtures** designed to test and demonstrate system capabilities across the 4 primary device domains (**Battery**, **Display**, **Camera**, **Performance**). They are not claimed to be proprietary OEM source data.
+> **Data Provenance Notice:** As per project guidelines, the datasets provided in `app/data/` are clearly labeled **prototype demonstration fixtures** designed to evaluate system capabilities across the 4 primary device domains (**Battery**, **Display**, **Camera**, **Performance**). They are not claimed to be proprietary OEM source data.
 
 - **`app/data/queries.json`**: Prototype test queries covering formal, casual, typo, and frustrated variations.
 - **`app/data/siis_responses.json`**: Grounded reference articles for troubleshooting symptoms.
@@ -140,7 +143,7 @@ Generates a structured, validated troubleshooting plan.
 }
 ```
 
-**Response:**
+**Response (Grounded Match):**
 ```json
 {
   "contexts": [
@@ -186,6 +189,7 @@ Generates a structured, validated troubleshooting plan.
     }
   ],
   "metadata": {
+    "status": "SUCCESS",
     "cache_hit": false,
     "cache_hit_type": "MISS",
     "latency_ms": 0.65,
@@ -255,17 +259,19 @@ python -m benchmarks.benchmark
 
 ## 9. Performance & Evaluation Results
 
-All numbers below were measured using the automated benchmark harness (`benchmarks/benchmark.py`):
+> **Benchmark Environment:** Windows 11, Python 3.14.5, AMD Ryzen / Intel Core CPU.
+> **Methodology:** Measured using the uncontaminated benchmark harness (`benchmarks/benchmark.py`), with separate measurements for cold execution, exact cache hits, and unprimed semantic paraphrase retrieval.
 
 | Metric | Target SLA | Measured Result | Status |
 |---|---:|---:|:---:|
-| **Cached Response P95 (Exact Hash)** | < 300.00 ms | **0.13 ms** | ✅ PASS |
-| **Cached Response P95 (Semantic Paraphrase)** | < 300.00 ms | **0.11 ms** | ✅ PASS |
-| **Cached Response P50** | < 300.00 ms | **0.03 ms** | ✅ PASS |
-| **Cold Pipeline P95** | Baseline | **0.74 ms** | ✅ PASS |
-| **Cold Pipeline P50** | Baseline | **0.30 ms** | ✅ PASS |
-| **Semantic Paraphrase Cache Hit Rate** | > 85.0% | **96.0%** | ✅ PASS |
-| **Automated Test Suite** | 100% Pass | **27 / 27 Passed** | ✅ PASS |
+| **Fast-Path Exact Hit P95** | < 300.00 ms | **0.037 ms** | ✅ PASS |
+| **Fast-Path Exact Hit P50** | < 300.00 ms | **0.031 ms** | ✅ PASS |
+| **Fast-Path Semantic Hit P95** | < 300.00 ms | **0.040 ms** | ✅ PASS |
+| **Fast-Path Semantic Hit P50** | < 300.00 ms | **0.021 ms** | ✅ PASS |
+| **Cold Pipeline P95** | Baseline | **0.862 ms** | ✅ PASS |
+| **Cold Pipeline P50** | Baseline | **0.417 ms** | ✅ PASS |
+| **Uncontaminated Semantic Paraphrase Hit Rate** | Prototype Lexical | **37.5%** | Measured |
+| **Automated Test Suite** | 100% Pass | **41 / 41 Passed** | ✅ PASS |
 
 ---
 
@@ -309,10 +315,10 @@ All numbers below were measured using the automated benchmark harness (`benchmar
 ## 11. Known Limitations & Future Work
 
 ### Limitations
-1. **Catalog Scope:** Prototype catalog indexes representative device settings across Battery, Display, Camera, and Performance; production deployment would index comprehensive OEM setting trees.
-2. **Device Hardware Variations:** Different Android OS versions and OEM skins may have distinct deep settings paths.
+1. **Prototype Lexical Semantic Cache:** The current in-memory cache uses normalized content word and bigram cosine similarity (37.5% recall on arbitrary unprimed paraphrases). It does not use dense transformer embeddings.
+2. **Catalog Scope:** Prototype catalog indexes representative device settings across Battery, Display, Camera, and Performance; production systems would ingest complete OEM settings manifests.
 
 ### Future Work
-1. **Dynamic Catalog Ingestion:** Automated ingestion and vector indexing of live OEM settings manifests.
-2. **Multilingual Query Normalization:** Support for multilingual user queries across 20+ languages.
-3. **On-Device Micro-Embedding Execution:** Running lightweight on-device embedding models directly inside the troubleshooting client.
+1. **Dense Vector Embeddings:** Integrating lightweight on-device embedding models (e.g. `all-MiniLM-L6-v2` or `BGE-small`) to increase semantic paraphrase hit rate from 37.5% to >90%.
+2. **Dynamic Catalog Sync:** Real-time ingestion and validation of updated OEM settings hierarchies.
+3. **Multilingual Query Normalization:** Query enrichment across 20+ languages.

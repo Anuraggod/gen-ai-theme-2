@@ -1,8 +1,8 @@
 """
-semantic_cache.py - Fast-Path Caching Engine.
+semantic_cache.py - Fast-Path Lexical Semantic Caching Engine.
 Stores cached, validated troubleshooting plans.
-Guarantees sub-300ms retrieval times.
-Supports exact hash matching and semantic paraphrase similarity lookup.
+Supports exact SHA256 hash matching and lexical semantic-similarity lookup
+using normalized content terms and bigram cosine similarity.
 """
 
 import math
@@ -23,9 +23,9 @@ STOPWORDS = {
 
 class FastPathSemanticCache:
     """
-    Two-tier in-memory semantic cache:
-    - Tier 1: Exact normalized query hash (SHA256) -> sub-2ms
-    - Tier 2: Cosine similarity vector search over content terms & bigrams -> sub-15ms
+    Two-tier in-memory lexical semantic cache:
+    - Tier 1: Exact normalized query hash (SHA256) -> sub-1ms
+    - Tier 2: Lexical semantic-similarity search via term & bigram cosine similarity -> sub-15ms
     """
 
     def __init__(self, threshold: float = SEMANTIC_CACHE_THRESHOLD, max_size: int = SEMANTIC_CACHE_MAX_SIZE):
@@ -42,7 +42,7 @@ class FastPathSemanticCache:
     @staticmethod
     def _text_to_vector(text: str) -> Counter:
         """
-        Creates term frequency vector with content words and bigrams.
+        Creates term frequency vector with content words and bigrams for lexical semantic retrieval.
         """
         words = [w for w in re.findall(r"\b\w+\b", text.lower()) if w not in STOPWORDS]
         if not words:
@@ -84,7 +84,7 @@ class FastPathSemanticCache:
                 goal, _ = self.exact_cache[query_hash]
                 return goal, "EXACT_HIT", 1.0
 
-            # Tier 2: Semantic Similarity Search
+            # Tier 2: Lexical Semantic Similarity Search
             if not self.semantic_entries:
                 return None, "MISS", 0.0
 

@@ -13,8 +13,8 @@ SIIS_PATH = DATA_DIR / "siis_responses.json"
 DEEPLINKS_PATH = DATA_DIR / "deeplinks.json"
 SAMPLES_PATH = DATA_DIR / "samples"
 
-# Semantic cache settings
-SEMANTIC_CACHE_THRESHOLD = float(os.getenv("SEMANTIC_CACHE_THRESHOLD", "0.82"))
+# Fast-path lexical semantic cache settings
+SEMANTIC_CACHE_THRESHOLD = float(os.getenv("SEMANTIC_CACHE_THRESHOLD", "0.55"))
 SEMANTIC_CACHE_MAX_SIZE = int(os.getenv("SEMANTIC_CACHE_MAX_SIZE", "1000"))
 
 # Service Metadata
