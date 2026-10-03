@@ -285,7 +285,7 @@ cd gen-ai-theme-2
 python -m pip install -r requirements.txt
 
 # 3. Run FastAPI Application & Demo UI
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Access the interactive web UI at: **`http://localhost:8000`**
 Access interactive Swagger API docs at: **`http://localhost:8000/docs`**
