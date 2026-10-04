@@ -8,8 +8,8 @@
 
 | Resource | Link |
 |---|---|
-| 📊 Project PPT | [ADD PPT LINK HERE] |
-| 🎥 Video Demo | [ADD VIDEO DEMO LINK HERE] |
+| 📊 Project PPT | https://1drv.ms/p/c/1c6fd92f85d98002/IQDNljwyQNXpSqMW1fkEbHQsAXEjr6TpJua8iliEzBlCSTE?e=PvabQt |
+| 🎥 Video Demo | https://1drv.ms/v/c/1c6fd92f85d98002/IQBEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf?e=b6jZrq |
 | 💻 GitHub Repository | https://github.com/Anuraggod/gen-ai-theme-2 |
 
 ---
